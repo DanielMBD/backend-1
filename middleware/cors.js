@@ -4,6 +4,7 @@ const cors = require('cors');
 const corsOptions = {
   origin: [
     'https://gabonconcours.vercel.app',
+    'https://gabonconcours.netlify.app',
     'http://localhost:5173',
     'http://localhost:3002',
     'http://localhost:8081',
@@ -22,7 +23,7 @@ const corsOptions = {
     'http://127.0.0.1:8086',  'http://localhost:8089',
     'http://127.0.0.1:8086',  'http://localhost:8089',
     'http://127.0.0.1:8087',  'http://localhost:8090',
-    'http://127.0.0.1:8087',  'https://gabonconcours.netlify.app',
+    'http://127.0.0.1:8087',
     'http://127.0.0.1:8088',
   ],
   credentials: true,
