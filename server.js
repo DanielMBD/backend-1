@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -21,9 +21,9 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.get("/cors-test", (req, res) => {
-  res.json({ msg: "CORS OK ✅" });
-});
+app.use(cors({
+  origin: 'https://gabonconcours.netlify.app' // or '*' for all origins (not recommended for production)
+}));
 
 /* =====================================================
    📂 Création des répertoires uploads
