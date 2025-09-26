@@ -21,6 +21,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+app.get("/cors-test", (req, res) => {
+  res.json({ msg: "CORS OK ✅" });
+});
 
 /* =====================================================
    📂 Création des répertoires uploads
