@@ -22,7 +22,7 @@ const corsOptions = {
     'http://127.0.0.1:8086',  'http://localhost:8089',
     'http://127.0.0.1:8086',  'http://localhost:8089',
     'http://127.0.0.1:8087',  'http://localhost:8090',
-    'http://127.0.0.1:8087',  'http://localhost:8090',
+    'http://127.0.0.1:8087',  'https://gabonconcours.netlify.app',
     'http://127.0.0.1:8088',
   ],
   credentials: true,
