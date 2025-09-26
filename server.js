@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('./middleware/cors');
+// const cors = require('./middleware/cors');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
@@ -18,7 +18,7 @@ uploadDirs.forEach(dir => {
 });
 
 // Middleware
-app.use(cors);
+// app.use(cors);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
