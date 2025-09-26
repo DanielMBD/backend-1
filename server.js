@@ -1,5 +1,5 @@
 const express = require('express');
-// const cors = require('./middleware/cors');
+// const cors = require('./middleware/cors'); // inutile maintenant
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
@@ -8,21 +8,40 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Créer les répertoires uploads s'ils n'existent pas
+/* =====================================================
+   🔥 Middleware global pour désactiver CORS
+===================================================== */
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // tout le monde autorisé
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+/* =====================================================
+   📂 Création des répertoires uploads
+===================================================== */
 const uploadDirs = ['./uploads/documents', './uploads/photos'];
 uploadDirs.forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    console.log(` Répertoire créé: ${dir}`);
+    console.log(`✅ Répertoire créé: ${dir}`);
   }
 });
 
-// Middleware
-// app.use(cors);
+/* =====================================================
+   ⚙️ Middleware
+===================================================== */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configuration multer pour l'upload de fichiers
+/* =====================================================
+   📂 Configuration Multer (upload fichiers)
+===================================================== */
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = './uploads/documents';
@@ -52,7 +71,9 @@ const upload = multer({
 
 app.use('/uploads', express.static('uploads'));
 
-// Routes
+/* =====================================================
+   📌 Import des routes
+===================================================== */
 const concoursRoutes = require('./routes/concours');
 const candidatsRoutes = require('./routes/candidats');
 const provincesRoutes = require('./routes/provinces');
@@ -74,8 +95,6 @@ const adminDocumentsRoutes = require('./routes/admin-documents');
 const notificationsRoutes = require('./routes/notifications');
 const supportRoutes = require('./routes/supportRoutes');
 
-
-// API Routes
 app.use('/api/concours', concoursRoutes);
 app.use('/api/candidats', candidatsRoutes);
 app.use('/api/provinces', provincesRoutes);
@@ -102,42 +121,19 @@ app.use('/api/admin/management', require('./routes/adminManagement'));
 app.use('/api/admin', adminDocumentsRoutes);
 app.use('/api/admin', require('./routes/admin'));
 
-// Importer les fonctions de base de données
-const { createConnection, testConnection } = require('./config/database');
-
-// Route de test
+/* =====================================================
+   📌 Routes test
+===================================================== */
 app.get('/api/test', (req, res) => {
   res.json({
-    message: 'API GabConcours fonctionnelle!',
-    timestamp: new Date().toISOString(),
-    routes_disponibles: [
-      '/api/concours',
-      '/api/candidats',
-      '/api/provinces',
-      '/api/niveaux',
-      '/api/filieres',
-      '/api/etablissements',
-      '/api/matieres',
-      '/api/participations',
-      '/api/dossiers',
-      '/api/sessions',
-      '/api/documents',
-      '/api/paiements',
-      '/api/statistics',
-      '/api/admin',
-      '/api/email',
-      '/api/etudiants',
-      '/api/document-validation',
-      '/api/notifications',
-      '/api/adminAuthRouter',
-      '/api/auth',
-      '/api/management'
-
-    ]
+    message: 'API GabConcours fonctionnelle! (CORS désactivé 🚀)',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Middleware de gestion d'erreurs
+/* =====================================================
+   ⚠️ Middleware gestion d’erreurs
+===================================================== */
 app.use((error, req, res, next) => {
   console.error('Erreur serveur:', error);
   if (error instanceof multer.MulterError) {
@@ -155,45 +151,40 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Route 404
+/* =====================================================
+   ❌ Route 404
+===================================================== */
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
-    message: `Route non trouvée: ${req.method} ${req.originalUrl}`,
-    available_routes: [
-      'GET /api/test',
-      'GET /api/concours',
-      'GET /api/candidats',
-      'GET /api/documents/nupcan/:nupcan',
-      'GET /api/paiements/nupcan/:nupcan'
-    ]
+    message: `Route non trouvée: ${req.method} ${req.originalUrl}`
   });
 });
 
-// Fonction pour démarrer le serveur
+/* =====================================================
+   🚀 Connexion DB et lancement serveur
+===================================================== */
+const { createConnection, testConnection } = require('./config/database');
+
 const startServer = async () => {
   try {
-    // Initialiser la connexion à la base de données avant de démarrer le serveur
-    console.log(' Initialisation de la connexion à la base de données...');
+    console.log('⏳ Initialisation de la connexion à la base de données...');
     await createConnection();
     await testConnection();
-    console.log(' Connexion à MySQL établie');
-    console.log(`  Base de données: ${process.env.DB_NAME || 'gabconcoursv1'}`);
+    console.log('✅ Connexion à MySQL établie');
+    console.log(`📌 Base de données: ${process.env.DB_NAME || 'gabconcoursv1'}`);
 
-    // Démarrer le serveur seulement après la connexion à la DB
     app.listen(PORT, () => {
-      console.log(` Serveur démarré sur le port ${PORT}`);
-      console.log(` API accessible sur: http://localhost:${PORT}/api`);
-      console.log(` Interface admin: http://localhost:5173/admin`);
+      console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+      console.log(`🌍 API accessible sur: http://localhost:${PORT}/api`);
+      console.log(`🔑 Interface admin: http://localhost:5173/admin`);
     });
   } catch (error) {
-    console.error(' Erreur de connexion à la base de données:', error.message);
-    console.error(' Arrêt du serveur - Impossible de se connecter à la base de données');
+    console.error('❌ Erreur de connexion à la base de données:', error.message);
     process.exit(1);
   }
 };
 
-// Démarrer le serveur
 startServer();
 
 module.exports = app;
